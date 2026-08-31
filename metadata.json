@@ -1,0 +1,6 @@
+{
+  "name": "ChessZen",
+  "description": "A comprehensive AI-powered chess learning platform from beginner to Grandmaster featuring real-time coaching, game analysis, opening explorer, and interactive tutorials.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,134 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User profile, chess ratings, experience points, level, and settings",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique user ID" },
+        "username": { "type": "string", "minLength": 2, "maxLength": 50, "description": "User display name" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "profilePicture": { "type": "string", "description": "Avatar URL" },
+        "level": { "type": "number", "description": "User level" },
+        "xp": { "type": "number", "description": "Experience points" },
+        "coins": { "type": "number", "description": "Zen Gold Coins balance" },
+        "elo": { "type": "number", "description": "Overall Coach ELO rating" },
+        "puzzleElo": { "type": "number", "description": "Tactical Puzzle ELO rating" },
+        "ratings": {
+          "type": "object",
+          "description": "Ratings per chess mode (bullet, blitz, rapid, classical)"
+        },
+        "modeStats": {
+          "type": "object",
+          "description": "Statistics per mode (games, wins, losses, draws, highest)"
+        },
+        "streak": { "type": "number", "description": "Current active daily learning streak" },
+        "bestStreak": { "type": "number", "description": "Best daily streak recorded" },
+        "unlockedBadges": { "type": "array", "description": "List of unlocked achievement badge IDs" },
+        "lastActiveDate": { "type": "string", "description": "ISO date YYYY-MM-DD" },
+        "createdAt": { "type": "string", "description": "Account creation timestamp" }
+      },
+      "required": ["username", "email", "elo", "puzzleElo", "level", "xp", "coins"]
+    },
+    "Match": {
+      "title": "Chess Match Record",
+      "description": "Individual played game history entry",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique match ID" },
+        "mode": { "type": "string", "description": "Game mode (bullet, blitz, rapid, classical, etc)" },
+        "opponent": { "type": "string", "description": "Opponent username or AI difficulty" },
+        "result": { "type": "string", "enum": ["win", "loss", "draw"], "description": "Match outcome" },
+        "eloChange": { "type": "number", "description": "Rating change from this match" },
+        "movesCount": { "type": "number", "description": "Total moves played" },
+        "date": { "type": "string", "description": "ISO timestamp of game end" },
+        "pgn": { "type": "string", "description": "PGN string of moves" }
+      },
+      "required": ["mode", "opponent", "result", "date"]
+    },
+    "StudyPlan": {
+      "title": "Personalized Study Plan",
+      "description": "Custom 7-day study curriculum generated for user",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique study plan ID" },
+        "title": { "type": "string", "description": "Title of curriculum" },
+        "focusAreas": { "type": "array", "description": "List of focus topics" },
+        "dailySchedule": { "type": "array", "description": "Daily topics and practice tasks" },
+        "generalAdvice": { "type": "string", "description": "Coach guidance summary" },
+        "createdAt": { "type": "string", "description": "Timestamp created" }
+      },
+      "required": ["title", "focusAreas", "createdAt"]
+    },
+    "GameRequest": {
+      "title": "Friend Game Request",
+      "description": "Invitation sent between friends to play a chess match",
+      "type": "object",
+      "properties": {
+        "requestId": { "type": "string", "description": "Unique request ID" },
+        "senderId": { "type": "string", "description": "Sender User ID" },
+        "senderUsername": { "type": "string", "description": "Sender Username" },
+        "senderRating": { "type": "number", "description": "Sender ELO Rating" },
+        "senderLevel": { "type": "number", "description": "Sender Level" },
+        "senderProfilePicture": { "type": "string", "description": "Sender profile picture URL" },
+        "receiverId": { "type": "string", "description": "Receiver User ID" },
+        "receiverUsername": { "type": "string", "description": "Receiver Username" },
+        "status": { "type": "string", "enum": ["pending", "accepted", "declined", "expired"], "description": "Request state" },
+        "type": { "type": "string", "description": "Type of invitation" },
+        "createdAt": { "type": "string", "description": "Timestamp created" },
+        "updatedAt": { "type": "string", "description": "Timestamp updated" },
+        "gameId": { "type": "string", "description": "Associated game ID if accepted" }
+      },
+      "required": ["requestId", "senderUsername", "receiverUsername", "status", "createdAt"]
+    },
+    "MultiplayerGame": {
+      "title": "Real-time Multiplayer Game",
+      "description": "Active or completed live chess game between two players",
+      "type": "object",
+      "properties": {
+        "gameId": { "type": "string", "description": "Unique game ID" },
+        "whitePlayerId": { "type": "string", "description": "White player user ID" },
+        "whiteUsername": { "type": "string", "description": "White player username" },
+        "whiteRating": { "type": "number", "description": "White player rating" },
+        "blackPlayerId": { "type": "string", "description": "Black player user ID" },
+        "blackUsername": { "type": "string", "description": "Black player username" },
+        "blackRating": { "type": "number", "description": "Black player rating" },
+        "timeControl": { "type": "string", "description": "Time control setting (e.g. 10+5)" },
+        "gameMode": { "type": "string", "description": "Game mode category (rapid, blitz, bullet, etc)" },
+        "status": { "type": "string", "enum": ["lobby", "active", "completed", "resigned", "draw", "timeout"], "description": "Current game state" },
+        "currentTurn": { "type": "string", "enum": ["w", "b"], "description": "Current turn color" },
+        "fen": { "type": "string", "description": "FEN string of board state" },
+        "whiteTimeLeft": { "type": "number", "description": "White player remaining clock in seconds" },
+        "blackTimeLeft": { "type": "number", "description": "Black player remaining clock in seconds" },
+        "lastMoveTimestamp": { "type": "number", "description": "Epoch ms timestamp of last move" },
+        "winner": { "type": "string", "description": "Outcome winner (white, black, draw)" },
+        "finishReason": { "type": "string", "description": "Game completion reason" },
+        "createdAt": { "type": "string", "description": "Timestamp created" },
+        "updatedAt": { "type": "string", "description": "Timestamp updated" }
+      },
+      "required": ["gameId", "whiteUsername", "blackUsername", "status", "currentTurn", "fen"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profile information and ratings"
+    },
+    "/users/{userId}/matches/{matchId}": {
+      "schema": { "$ref": "#/entities/Match" },
+      "description": "User match history"
+    },
+    "/users/{userId}/studyPlans/{planId}": {
+      "schema": { "$ref": "#/entities/StudyPlan" },
+      "description": "Saved study plans"
+    },
+    "/gameRequests/{requestId}": {
+      "schema": { "$ref": "#/entities/GameRequest" },
+      "description": "Friend game requests and invitations"
+    },
+    "/games/{gameId}": {
+      "schema": { "$ref": "#/entities/MultiplayerGame" },
+      "description": "Real-time multiplayer chess game records"
+    }
+  }
+}

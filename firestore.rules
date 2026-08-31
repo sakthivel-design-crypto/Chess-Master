@@ -1,0 +1,112 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Default Deny Rule
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Common Hardened Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-\\.\\@\\+]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Schema Validation Helpers
+    function isValidUser(data) {
+      return data.username is string 
+        && data.username.size() >= 1 
+        && data.username.size() <= 100
+        && (data.email is string || !('email' in data))
+        && (data.elo is number || data.rating is number || !('elo' in data))
+        && (data.puzzleElo is number || !('puzzleElo' in data))
+        && (data.level is number || !('level' in data))
+        && (data.xp is number || !('xp' in data))
+        && (data.coins is number || !('coins' in data));
+    }
+
+    function isValidMatch(data) {
+      return (data.mode is string || !('mode' in data))
+        && (data.opponent is string || !('opponent' in data))
+        && (data.result is string || !('result' in data))
+        && (data.date is string || !('date' in data));
+    }
+
+    function isValidStudyPlan(data) {
+      return (data.title is string || !('title' in data))
+        && (data.focusAreas is list || !('focusAreas' in data))
+        && (data.createdAt is string || !('createdAt' in data));
+    }
+
+    // User Collection Rules
+    match /users/{userId} {
+      allow read: if true;
+      allow create, update: if isValidId(userId) && isValidUser(incoming());
+      allow delete: if false;
+
+      // Matches Subcollection
+      match /matches/{matchId} {
+        allow read: if true;
+        allow create, update: if isValidMatch(incoming());
+        allow delete: if false;
+      }
+
+      // Study Plans Subcollection
+      match /studyPlans/{planId} {
+        allow read: if true;
+        allow create, update: if isValidStudyPlan(incoming());
+        allow delete: if false;
+      }
+    }
+
+    // Helper validation for game requests
+    function isValidGameRequest(data) {
+      return (data.requestId is string || !('requestId' in data))
+        && (data.senderUsername is string || !('senderUsername' in data))
+        && (data.receiverUsername is string || !('receiverUsername' in data))
+        && (data.status is string || !('status' in data));
+    }
+
+    // Game Requests Collection
+    match /gameRequests/{requestId} {
+      allow read: if true;
+      allow create: if isValidGameRequest(incoming());
+      allow update: if isValidGameRequest(incoming()) && (incoming().status in ['pending', 'accepted', 'declined', 'cancelled']);
+      allow delete: if false;
+    }
+
+    // Helper validation for games
+    function isValidGameData(data) {
+      return (data.gameId is string || !('gameId' in data))
+        && (data.whiteUsername is string || !('whiteUsername' in data))
+        && (data.blackUsername is string || !('blackUsername' in data))
+        && (data.fen is string || !('fen' in data))
+        && (data.status is string || !('status' in data));
+    }
+
+    // Games Collection
+    match /games/{gameId} {
+      allow read: if true;
+      allow create: if isValidGameData(incoming());
+      allow update: if isValidGameData(incoming());
+      allow delete: if false;
+    }
+  }
+}

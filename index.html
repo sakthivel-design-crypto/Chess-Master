@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#0B0D17" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="ChessZen" />
+    <title>ChessZen - AI Chess Master</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <script>
+      // Early error barrier to intercept cross-origin script errors & unhandled rejections
+      window.onerror = function(message, source, lineno, colno, error) {
+        if (message === 'Script error.' || !message || (typeof message === 'string' && message.includes('Script error'))) {
+          return true; // Prevents generic cross-origin script error from bubbling
+        }
+        return false;
+      };
+      window.addEventListener('unhandledrejection', function(event) {
+        var reason = event && event.reason;
+        var msg = (reason && (reason.message || reason.error || String(reason))) || '';
+        if (
+          msg.indexOf('POPUP_CANCELLED') !== -1 ||
+          msg.indexOf('popup_closed_by_user') !== -1 ||
+          msg.indexOf('12501') !== -1 ||
+          msg.indexOf('websocket') !== -1
+        ) {
+          event.preventDefault();
+        }
+      });
+    </script>
+  </head>
+  <body class="bg-[#0B0D17] text-slate-100 antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+
