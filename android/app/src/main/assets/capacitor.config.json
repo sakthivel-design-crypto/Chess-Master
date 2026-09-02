@@ -1,0 +1,16 @@
+{
+	"appId": "com.aistudio.chesszen.app",
+	"appName": "ChessZen",
+	"webDir": "dist",
+	"server": {
+		"androidScheme": "https"
+	},
+	"plugins": {
+		"FirebaseAuthentication": {
+			"skipNativeAuth": false,
+			"providers": [
+				"google.com"
+			]
+		}
+	}
+}
