@@ -20,6 +20,7 @@ import {
   finalizeMultiplayerGameRatings
 } from "../services/multiplayerService";
 import { saveUserProfileToFirestore } from "../services/firestoreService";
+import { recordTournamentMatchResult } from "../services/tournamentService";
 import { Chessboard } from "./Chessboard";
 import { MoveHistoryPanel } from "./MoveHistoryPanel";
 import { BoardThemeSelector } from "./BoardThemeSelector";
@@ -44,6 +45,15 @@ import {
   Play
 } from "lucide-react";
 
+export interface TournamentMatchContext {
+  tournamentId: string;
+  tournamentName: string;
+  roundNumber: number;
+  boardNumber: number;
+  matchId: string;
+  onReturnToTournament: () => void;
+}
+
 interface FriendChessMatchProps {
   gameId: string;
   currentUsername: string;
@@ -54,6 +64,7 @@ interface FriendChessMatchProps {
   onAnalyzeGame: (gameData: CompletedGameData | string) => void;
   onUpdateProfile?: (updatedProfile: UserProfile) => void;
   userBoardTheme?: string;
+  tournamentContext?: TournamentMatchContext;
 }
 
 export const FriendChessMatch: React.FC<FriendChessMatchProps> = ({
@@ -65,7 +76,8 @@ export const FriendChessMatch: React.FC<FriendChessMatchProps> = ({
   onFinishGoToDashboard,
   onAnalyzeGame,
   onUpdateProfile,
-  userBoardTheme = "classic_wood"
+  userBoardTheme = "classic_wood",
+  tournamentContext
 }) => {
   const [gameData, setGameData] = useState<MultiplayerGame | null>(null);
   const [chessInstance, setChessInstance] = useState<Chess>(new Chess());
@@ -182,6 +194,28 @@ export const FriendChessMatch: React.FC<FriendChessMatchProps> = ({
       ).catch((err) => {
         console.warn("Unable to finalize multiplayer game ratings:", err);
       });
+
+      // If match is part of a Friends Tournament, record official tournament match outcome
+      if (tournamentContext) {
+        const resultStr: "1-0" | "0-1" | "1/2-1/2" =
+          gameData.winner === "white" ? "1-0" : gameData.winner === "black" ? "0-1" : "1/2-1/2";
+        const winnerUid =
+          gameData.winner === "white"
+            ? gameData.whitePlayerId
+            : gameData.winner === "black"
+            ? gameData.blackPlayerId
+            : "draw";
+
+        recordTournamentMatchResult(
+          tournamentContext.tournamentId,
+          tournamentContext.roundNumber,
+          tournamentContext.matchId,
+          resultStr,
+          winnerUid
+        ).catch((err) => {
+          console.warn("Unable to record tournament match result:", err);
+        });
+      }
 
       // Update local profile & UI
       if (userProfile && onUpdateProfile) {
@@ -608,16 +642,23 @@ export const FriendChessMatch: React.FC<FriendChessMatchProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 bg-[#070a12] flex flex-col items-center justify-between p-3 sm:p-5 select-none overflow-hidden font-sans">
-      {/* TOP HEADER: ← Back button */}
-      <div className="w-full max-w-[min(94vw,calc(100vh-175px),580px)] flex items-center justify-start shrink-0 pt-1 pb-1">
+      {/* TOP HEADER: ← Back button & Tournament Round indicator */}
+      <div className="w-full max-w-[min(94vw,calc(100vh-175px),580px)] flex items-center justify-between shrink-0 pt-1 pb-1">
         <button
           id="friend-match-back-button"
           onClick={handleBackClick}
           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-900/90 hover:bg-slate-800 text-slate-300 hover:text-white rounded-xl border border-slate-800 text-xs font-bold transition-colors cursor-pointer shadow-sm"
         >
           <ArrowLeft className="h-4 w-4 stroke-[2.5]" />
-          <span>Back</span>
+          <span>{tournamentContext ? "Tournament" : "Back"}</span>
         </button>
+
+        {tournamentContext && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs font-mono font-bold shadow-sm">
+            <Trophy className="h-3.5 w-3.5 text-amber-400 shrink-0" />
+            <span className="truncate max-w-[200px]">R{tournamentContext.roundNumber} • Board {tournamentContext.boardNumber}</span>
+          </div>
+        )}
       </div>
 
       {/* TOP PLAYER INFO & TIMER */}
@@ -731,26 +772,43 @@ export const FriendChessMatch: React.FC<FriendChessMatchProps> = ({
               </p>
             </div>
 
-            {/* Primary Action: Back to Dashboard */}
+            {/* Primary Action: Back to Tournament or Dashboard */}
             <div className="space-y-2.5 pt-1">
-              <button
-                id="friend-gameover-back-btn"
-                onClick={handleDirectGoToDashboard}
-                className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm rounded-xl transition-all shadow-lg shadow-amber-500/25 cursor-pointer flex items-center justify-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4 stroke-[2.5]" />
-                <span>Back to Dashboard</span>
-              </button>
+              {tournamentContext ? (
+                <button
+                  id="friend-gameover-tournament-return-btn"
+                  onClick={tournamentContext.onReturnToTournament}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm rounded-xl transition-all shadow-lg shadow-amber-500/25 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <Trophy className="h-4 w-4 stroke-[2.5]" />
+                  <span>Return to Tournament Room</span>
+                </button>
+              ) : (
+                <button
+                  id="friend-gameover-back-btn"
+                  onClick={handleDirectGoToDashboard}
+                  className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-black text-sm rounded-xl transition-all shadow-lg shadow-amber-500/25 cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <ArrowLeft className="h-4 w-4 stroke-[2.5]" />
+                  <span>Back to Dashboard</span>
+                </button>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <button
-                  id="friend-gameover-rematch-btn"
-                  onClick={() => handleRematchRequest(gameData, currentUsername, "request")}
-                  className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs rounded-xl border border-amber-500/30 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
-                >
-                  <RotateCcw className="h-4 w-4 text-amber-400" />
-                  <span>Request Rematch</span>
-                </button>
+                {!tournamentContext ? (
+                  <button
+                    id="friend-gameover-rematch-btn"
+                    onClick={() => handleRematchRequest(gameData, currentUsername, "request")}
+                    className="py-2.5 px-3 bg-slate-900 hover:bg-slate-800 text-amber-300 font-bold text-xs rounded-xl border border-amber-500/30 transition-all shadow-sm cursor-pointer flex items-center justify-center gap-1.5"
+                  >
+                    <RotateCcw className="h-4 w-4 text-amber-400" />
+                    <span>Request Rematch</span>
+                  </button>
+                ) : (
+                  <div className="py-2.5 px-3 bg-slate-900/60 text-slate-400 font-bold text-[11px] rounded-xl border border-slate-800 flex items-center justify-center text-center">
+                    <span>Tournament Match</span>
+                  </div>
+                )}
 
                 <button
                   id="friend-gameover-analyze-btn"

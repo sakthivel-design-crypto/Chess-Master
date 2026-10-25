@@ -719,3 +719,109 @@ export interface MultiplayerGame {
   updatedAt: string;
 }
 
+// ==========================================
+// FRIENDS TOURNAMENT TYPES & INTERFACES
+// ==========================================
+
+export type TournamentFormat = "swiss" | "round_robin";
+export type TournamentStatus = "waiting" | "in_progress" | "completed" | "cancelled";
+export type TournamentTiebreak = "buchholz" | "sonneborn_berger" | "wins";
+
+export interface TournamentTimeControlConfig {
+  label: string;
+  mode: GameModeKey;
+  initialTimeSeconds: number;
+  incrementSeconds: number;
+  category: "bullet" | "blitz" | "rapid" | "classical";
+}
+
+export interface TournamentPlayer {
+  uid: string;
+  username: string;
+  rating: number;
+  profilePicture?: string;
+  joinedAt: string;
+  isHost: boolean;
+  score: number;
+  wins: number;
+  draws: number;
+  losses: number;
+  gamesPlayed: number;
+  whiteGames: number;
+  blackGames: number;
+  byeCount: number;
+  previousOpponents: string[];
+  buchholzScore?: number;
+  sonnebornBergerScore?: number;
+  rank?: number;
+}
+
+export interface TournamentMatch {
+  id?: string;
+  matchId: string;
+  boardNumber: number;
+  roundNumber: number;
+  whiteUid: string;
+  blackUid: string;
+  whiteName: string;
+  blackName: string;
+  whiteRating: number;
+  blackRating: number;
+  whitePhoto?: string;
+  blackPhoto?: string;
+  status: "waiting" | "playing" | "completed";
+  result?: "1-0" | "0-1" | "1/2-1/2" | null;
+  winnerUid?: string | "draw" | null;
+  gameId?: string;
+  isBye?: boolean;
+  byePlayerUid?: string;
+  byePlayerName?: string;
+  completedAt?: string;
+}
+
+export interface TournamentRound {
+  id?: string;
+  roundId: string;
+  roundNumber: number;
+  status: "active" | "completed";
+  createdAt: string;
+  completedAt?: string;
+  totalMatches: number;
+  completedMatches: number;
+}
+
+export interface TournamentPodiumPlayer {
+  uid: string;
+  username: string;
+  rating: number;
+  score: number;
+  rank: number;
+  profilePicture?: string;
+}
+
+export interface Tournament {
+  id: string;
+  tournamentId: string;
+  roomId: string;
+  name: string;
+  hostUid: string;
+  hostUsername: string;
+  hostPhoto?: string;
+  format: TournamentFormat;
+  maxPlayers: number;
+  timeControl: string;
+  timeControlDetails: TournamentTimeControlConfig;
+  visibility: "private";
+  status: TournamentStatus;
+  currentRound: number;
+  totalRounds: number;
+  tiebreakMethod: TournamentTiebreak;
+  playersCount: number;
+  createdAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  champion?: TournamentPodiumPlayer | null;
+  secondPlace?: TournamentPodiumPlayer | null;
+  thirdPlace?: TournamentPodiumPlayer | null;
+}
+

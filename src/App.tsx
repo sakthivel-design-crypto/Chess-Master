@@ -23,6 +23,7 @@ import { Gambits } from "./components/Gambits";
 import { Scoresheet } from "./components/Scoresheet";
 import { PlayAiArena } from "./components/PlayAiArena";
 import { PlayWithFriends } from "./components/PlayWithFriends";
+import { FriendsTournament } from "./components/tournament/FriendsTournament";
 import { SplashScreen } from "./components/SplashScreen";
 import { ChessZenLogo } from "./components/ChessZenLogo";
 
@@ -796,7 +797,7 @@ export default function App() {
     { id: GameTab.PUZZLES, label: "Puzzle Trainer", icon: Zap },
     { id: GameTab.CHESSBOARD, label: "AI Coach", icon: Cpu },
     { id: GameTab.ANALYZER, label: "Game Analyzer", icon: RefreshCw },
-    { id: GameTab.ARENA, label: "Tournament Arena", icon: Trophy },
+    { id: GameTab.ARENA, label: "Friends Tournament", icon: Trophy },
     { id: GameTab.STUDY_PLANNER, label: "Personalized Study Plan", icon: Calendar },
     { id: GameTab.PROGRESS, label: "Progress Dashboard", icon: TrendingUp },
     { id: GameTab.FAVORITES, label: "Favorites", icon: Heart },
@@ -809,7 +810,7 @@ export default function App() {
     { id: GameTab.DASHBOARD, label: "Home", icon: LayoutDashboard },
     { id: GameTab.CHESSBOARD, label: "Play", icon: PlayCircle },
     { id: GameTab.LEARNING_PATH, label: "Learn", icon: BookOpen },
-    { id: GameTab.ARENA, label: "Arena", icon: Trophy },
+    { id: GameTab.ARENA, label: "Tournaments", icon: Trophy },
     { id: GameTab.PROFILE, label: "Profile", icon: User }
   ];
 
@@ -1298,104 +1299,19 @@ export default function App() {
             </div>
           )}
 
-          {/* TAB 9: Tournament Arena View (Custom Screen) */}
+          {/* TAB 9: Friends Tournament View (Replaces Tournament Arena) */}
           {activeTab === GameTab.ARENA && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-bold font-display tracking-tight text-white flex items-center gap-2">
-                    <Swords className="h-6 w-6 text-emerald-400" /> Tournament Arena
-                  </h1>
-                  <p className="text-sm text-slate-400">
-                    Join online chess bracket cups to score grandmaster status points.
-                  </p>
-                </div>
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-1.5 text-xs text-emerald-400 font-bold flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-                  3 Active Arenas Open
-                </div>
-              </div>
-
-              {/* Arenas Grid list */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {[
-                  { id: "rapid", name: "Zen Rapid Grand Open", players: 124, duration: "10m + 5s", rating: "All Ratings", botElo: 1400 },
-                  { id: "blitz", name: "Google AI Blitz Brawl", players: 86, duration: "3m + 2s", rating: "Under 1600 ELO", botElo: 1100 },
-                  { id: "masters", name: "DeepMind Masters Cup", players: 240, duration: "5m + 3s", rating: "Open Championship", botElo: 2600 }
-                ].map((arena) => (
-                  <div key={arena.id} className="rounded-2xl border border-slate-900 bg-slate-950 p-5 flex flex-col justify-between space-y-4 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 h-16 w-16 bg-gradient-to-br from-indigo-500/10 to-transparent pointer-events-none" />
-                    
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[9px] font-mono font-bold bg-slate-900 text-slate-400 px-2 py-0.5 rounded">
-                          {arena.duration}
-                        </span>
-                        <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-                          ● {arena.players} Joined
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-sm text-white font-display group-hover:text-emerald-400 transition-colors">
-                        {arena.name}
-                      </h3>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        Class category: <strong>{arena.rating}</strong>. Defeat pairings to secure the Champion's crown!
-                      </p>
-                    </div>
-
-                    <button
-                      onClick={() => handleJoinTournament(arena.name, arena.botElo)}
-                      disabled={arenaJoinLoading !== null}
-                      className="w-full rounded-xl bg-gradient-to-r from-emerald-500 to-indigo-600 hover:opacity-95 text-white py-2.5 text-xs font-extrabold transition-all cursor-pointer disabled:opacity-50 inline-flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-500/10"
-                    >
-                      {arenaJoinLoading === arena.name ? (
-                        <>
-                          <RefreshCw className="h-3.5 w-3.5 animate-spin" /> Matching...
-                        </>
-                      ) : (
-                        "Join Arena Bracket"
-                      )}
-                    </button>
-                  </div>
-                ))}
-              </div>
-
-              {/* Leaderboard shelf in Arena */}
-              <div className="rounded-2xl border border-slate-900 bg-slate-950 p-6 space-y-4">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-900">
-                  <h3 className="font-bold text-white font-display flex items-center gap-1.5">
-                    🏆 Global Tournament Leaderboard
-                  </h3>
-                  <span className="text-xs font-mono font-bold text-slate-400">Week 3 Standing</span>
-                </div>
-
-                <div className="space-y-2.5">
-                  {[
-                    { rank: 1, name: "Magnus Carlsen", score: "2,420 pts", title: "GM" },
-                    { rank: 2, name: "Hikaru Nakamura", score: "2,180 pts", title: "GM" },
-                    { rank: 3, name: "Sathish Kumar", score: "1,850 pts", title: "Master" },
-                    { rank: 4, name: `${profile.username} (You)`, score: `${profile.elo + 120} pts`, title: "Local", isUser: true }
-                  ].map((player, idx) => (
-                    <div key={idx} className={`p-3 rounded-xl flex items-center justify-between text-xs ${
-                      player.isUser 
-                        ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400" 
-                        : "border border-slate-900 bg-slate-950/60"
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <span className="font-mono font-black text-slate-500 min-w-[20px]">#{player.rank}</span>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold">{player.name}</span>
-                          <span className="px-1 py-0.5 rounded text-[8px] font-mono font-bold bg-slate-900 text-slate-400">
-                            {player.title}
-                          </span>
-                        </div>
-                      </div>
-                      <span className="font-mono font-bold">{player.score}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <FriendsTournament
+              currentUserId={profile.uid}
+              currentUsername={profile.username}
+              currentUserPhoto={profile.profilePicture}
+              currentUserRating={profile.ratings?.rapid || profile.elo || 1200}
+              userProfile={profile}
+              onBackToDashboard={() => navigate(GameTab.DASHBOARD)}
+              onAnalyzeGame={(gameData) => handleOpenAnalyzer(gameData, GameTab.ARENA)}
+              onUpdateProfile={(updated) => setProfile(updated)}
+              userBoardTheme={profile.settings?.boardTheme || profile.boardTheme || profile.themePreference || "classic_wood"}
+            />
           )}
 
           {/* TAB 10: Progress View (Custom Dashboard) */}

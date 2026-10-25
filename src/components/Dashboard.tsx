@@ -207,23 +207,23 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </button>
         </div>
 
-        {/* Card C: Tournament Banner (Arena) */}
-        <div className="rounded-2xl border border-slate-200/60 bg-gradient-to-br from-indigo-950/40 via-slate-900/40 to-slate-950 p-5 shadow-sm dark:border-slate-800/80 flex flex-col justify-between">
+        {/* Card C: Friends Tournament Banner */}
+        <div className="rounded-2xl border border-amber-500/30 bg-gradient-to-br from-[#0F1326] via-[#121935] to-[#0A0D1B] p-5 shadow-sm flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <Swords className="h-4 w-4 text-emerald-400" />
-              <span className="text-[10px] font-mono font-bold text-emerald-400 uppercase">Live Competitive Arena</span>
+              <Trophy className="h-4 w-4 text-amber-400" />
+              <span className="text-[10px] font-mono font-bold text-amber-400 uppercase">Swiss & Round Robin</span>
             </div>
-            <h3 className="text-base font-extrabold text-white font-display">Tournament Arena</h3>
-            <p className="text-xs text-slate-400 leading-relaxed">
-              Join active rapid tournaments against real-time local chess software bots and gain arena points!
+            <h3 className="text-base font-extrabold text-white font-display">Friends Tournament</h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Host private tournaments, invite up to 50 players with Room IDs, and battle with automated pairings & live standings!
             </p>
           </div>
           <button 
             onClick={() => onNavigate("arena")}
-            className="mt-4 w-full rounded-xl bg-gradient-to-r from-emerald-500 to-indigo-600 text-white py-2.5 text-xs font-bold flex items-center justify-center gap-1 shadow-md shadow-emerald-500/10 cursor-pointer"
+            className="mt-4 w-full rounded-xl bg-gradient-to-r from-amber-500 to-amber-400 text-slate-950 font-black py-2.5 text-xs flex items-center justify-center gap-1 shadow-md shadow-amber-500/20 hover:from-amber-400 hover:to-amber-300 transition-all cursor-pointer"
           >
-            Enter Arena <ChevronRight className="h-3.5 w-3.5" />
+            Enter Tournaments <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
 

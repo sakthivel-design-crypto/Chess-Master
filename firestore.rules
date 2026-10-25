@@ -108,5 +108,39 @@ service cloud.firestore {
       allow update: if isValidGameData(incoming());
       allow delete: if false;
     }
+
+    // Friends Tournament Collections & Subcollections
+    match /tournamentRooms/{roomId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if true;
+    }
+
+    match /tournaments/{tournamentId} {
+      allow read: if true;
+      allow create, update: if true;
+      allow delete: if true;
+
+      // Tournament Players Subcollection
+      match /players/{playerId} {
+        allow read: if true;
+        allow create, update: if true;
+        allow delete: if true;
+      }
+
+      // Tournament Rounds Subcollection
+      match /rounds/{roundId} {
+        allow read: if true;
+        allow create, update: if true;
+        allow delete: if true;
+
+        // Tournament Matches Subcollection
+        match /matches/{matchId} {
+          allow read: if true;
+          allow create, update: if true;
+          allow delete: if true;
+        }
+      }
+    }
   }
 }
